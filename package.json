@@ -12,7 +12,9 @@
     "dev": "tsx src/index.ts",
     "demo": "tsx src/demo-landing.ts",
     "dev:landing": "cd demo/landing && (test -d node_modules || npm install) && npm run dev",
-    "scan": "tsx src/scan.ts"
+    "scan": "tsx src/scan.ts",
+    "comment": "tsx src/generate-comment.ts",
+    "paper": "node scripts/build-paper.mjs"
   },
   "keywords": [
     "playwright",
@@ -39,6 +41,7 @@
     "@types/node": "^22.10.0",
     "@vercel/ncc": "^0.38.0",
     "eslint": "^9.0.0",
+    "marked": "^18.0.5",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "vitest": "^2.1.0"
