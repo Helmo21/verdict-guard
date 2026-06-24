@@ -1,0 +1,49 @@
+{
+  "name": "verdict-guard",
+  "version": "0.1.0",
+  "description": "GitHub Action that catches dishonest Playwright tests and triages real failures using AI as a reasoning layer over Playwright reports.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && ncc build dist/index.js -o dist --minify",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src tests --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsx src/index.ts",
+    "demo": "tsx src/demo-landing.ts",
+    "dev:landing": "cd demo/landing && (test -d node_modules || npm install) && npm run dev",
+    "scan": "tsx src/scan.ts"
+  },
+  "keywords": [
+    "playwright",
+    "github-actions",
+    "test-automation",
+    "ai",
+    "qa",
+    "flaky-tests",
+    "test-triage"
+  ],
+  "author": "Antoine Pedretti",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.11.0",
+    "@actions/github": "^6.0.0",
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@typescript-eslint/typescript-estree": "^8.0.0",
+    "fast-glob": "^3.3.0",
+    "openai": "^6.44.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@vercel/ncc": "^0.38.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,18 @@
+node_modules/
+dist/
+*.log
+.env
+.env.local
+coverage/
+.vitest-cache/
+/playwright-report/
+test-results/
+
+# Local-only teaching session notes (not for public repo)
+.teach-session/
+
+# Landing demo (Next.js scaffold under demo/landing/)
+demo/landing/node_modules/
+demo/landing/.next/
+demo/landing/next-env.d.ts
+# demo/landing/playwright-report/results.json is curated; intentionally tracked

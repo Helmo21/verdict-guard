@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "tests/**"
+      - "playwright.config.ts"
+      - ".github/workflows/ci.yml"
+
+jobs:
+  test-and-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write   # required to post the PR comment
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0     # required so verdict-guard can git diff against the base branch
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        # || true so the workflow continues even when tests fail —
+        # we still want verdict-guard to post its triage on failures.
+        run: npx playwright test --reporter=json | tee playwright-report/results.json || true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - id: verdict
+        uses: antoine-pedretti/verdict-guard@v1
+        with:
+          # Provide ANY ONE of these three keys. Resolution priority when multiple are set:
+          #   anthropic > openrouter > openai
+          # (or pin explicitly with `llm-provider: anthropic | openai | openrouter`)
+          anthropic-api-key:  ${{ secrets.ANTHROPIC_API_KEY }}     # default model: claude-sonnet-4-6
+          openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}    # default model: anthropic/claude-sonnet-4.6 (SAME model)
+          openai-api-key:     ${{ secrets.OPENAI_API_KEY }}        # default model: gpt-5-mini
+          # llm-provider: anthropic
+          # llm-model: claude-sonnet-4-6
+          # For fork PRs no secrets are exposed — degrade gracefully to rubric-only.
+          mode: ${{ github.event.pull_request.head.repo.fork && 'rubric-only' || 'full' }}
+          playwright-report-path: playwright-report
+          tests-glob: "tests/**/*.spec.ts"
+          threshold: 70
+          max-failure-triages: 5
+
+      # Optional hard gate: block merge if any test scored below threshold.
+      - name: Block merge on dishonest tests
+        if: steps.verdict.outputs.failed-rubric-count > 0
+        run: |
+          echo "::error::${{ steps.verdict.outputs.failed-rubric-count }} test(s) below the verdict-guard threshold."
+          exit 1

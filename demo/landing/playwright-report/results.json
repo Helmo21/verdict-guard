@@ -1,0 +1,43 @@
+{
+  "stats": { "expected": 14, "flaky": 0 },
+  "suites": [
+    {
+      "specs": [
+        {
+          "title": "creates a transfer and shows the new balance",
+          "file": "tests/transfer.spec.ts",
+          "tests": [
+            {
+              "results": [
+                {
+                  "status": "failed",
+                  "error": {
+                    "message": "Timed out 5000ms waiting for expect(locator).toHaveText(expected)\n\nLocator: getByTestId('balance')\nExpected string: \"€900.00\"\nReceived: <element(s) not found>",
+                    "stack": "TimeoutError: locator.toHaveText: Timeout 5000ms exceeded.\n  waiting for getByTestId('balance')\n    at demo/landing/tests/transfer.spec.ts:10:50\n\n  - locator resolved to 0 elements\n  - retrying 'toHaveText' assertion every 100ms\n\nDOM snapshot at failure (page region around the transfer form):\n  <aside class=\"rounded-lg border border-zinc-200 bg-white p-5\">\n    <div class=\"text-sm text-zinc-500\">Current balance</div>\n    <div data-testid=\"account-balance\" class=\"mt-1 text-2xl font-semibold text-zinc-900\">€900.00</div>\n  </aside>\n\nObservation: the DOM contains <div data-testid=\"account-balance\">€900.00</div>. The value the test expected (€900.00) is present, but under a renamed testid ('account-balance' instead of 'balance')."
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "logs in successfully and shows the logged-in identity",
+          "file": "tests/login.spec.ts",
+          "tests": [
+            {
+              "results": [
+                {
+                  "status": "failed",
+                  "error": {
+                    "message": "Timed out 5000ms waiting for expect(locator).toContainText(expected)\n\nLocator: getByTestId('logged-in-as')\nExpected substring: \"alice@verdict.bank\"\nReceived: <element(s) not found>",
+                    "stack": "TimeoutError: locator.toContainText: Timeout 5000ms exceeded.\n  waiting for getByTestId('logged-in-as')\n    at demo/landing/tests/login.spec.ts:8:50\n\n  - locator resolved to 0 elements after form submission\n\nNetwork trace (last 5s before failure):\n  POST /api/login → 200 OK\n  GET  /api/session → 200 OK { \"userId\": \"alice-123\", \"requiresOnboarding\": true }\n  GET  /onboarding → 200 OK (redirected here instead of /dashboard)\n\nDOM snapshot at failure (current URL: /onboarding):\n  <main>\n    <h1>Welcome — let's set up your account</h1>\n    <p>Please verify your phone number to continue.</p>\n  </main>\n\nObservation: the user authenticated successfully (200 from /api/login) but the session endpoint returned requiresOnboarding=true, redirecting to /onboarding instead of /dashboard. The login itself worked; the test's assumption about post-login navigation no longer holds."
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+name: "verdict-guard"
+description: "Catch dishonest Playwright tests and triage real failures before they reach main."
+author: "Antoine Pedretti"
+branding:
+  icon: "shield"
+  color: "purple"
+
+inputs:
+  anthropic-api-key:
+    description: "Anthropic API key. One of anthropic / openai / openrouter is required for 'full' or 'triage-only'."
+    required: false
+  openai-api-key:
+    description: "OpenAI API key. Defaults to model 'gpt-5-mini' (comparable tier to Claude Sonnet)."
+    required: false
+  openrouter-api-key:
+    description: "OpenRouter API key. Defaults to model 'anthropic/claude-sonnet-4.6' — the SAME model as native Anthropic, routed via OpenRouter."
+    required: false
+  llm-provider:
+    description: "Explicit provider override: 'anthropic' | 'openai' | 'openrouter'. If unset, picks whichever key is present (anthropic > openrouter > openai)."
+    required: false
+  llm-model:
+    description: "Optional model override. If unset, uses the provider's default (claude-sonnet-4-6 / anthropic/claude-sonnet-4.6 / gpt-5-mini)."
+    required: false
+  mode:
+    description: "full | rubric-only | triage-only"
+    required: false
+    default: "full"
+  playwright-report-path:
+    description: "Path to the Playwright report directory (contains results.json and trace.zip)."
+    required: false
+    default: "playwright-report"
+  tests-glob:
+    description: "Glob matching the test files to scan."
+    required: false
+    default: "tests/**/*.spec.ts"
+  threshold:
+    description: "Minimum rubric score (0-100). Tests below threshold are flagged in the comment."
+    required: false
+    default: "70"
+  max-failure-triages:
+    description: "Maximum number of failures to send to the LLM per PR."
+    required: false
+    default: "5"
+  github-token:
+    description: "Token used to post the PR comment."
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  failed-rubric-count:
+    description: "Number of tests that scored below the threshold."
+  triaged-failure-count:
+    description: "Number of failures triaged by the LLM."
+  comment-url:
+    description: "URL of the posted PR comment."
+  llm-provider:
+    description: "The LLM provider actually used (anthropic | openai | openrouter | none)."
+  llm-model:
+    description: "The model actually used."
+
+runs:
+  using: "node20"
+  main: "dist/index.js"
