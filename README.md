@@ -8,23 +8,19 @@
 
 ---
 
-## What it does (90 seconds)
+## Observation
 
-You ship a PR with a new Playwright test. Today the existing ecosystem tells you:
+AI assistants increasingly write Playwright tests that pass without verifying anything meaningful — the test compiles, asserts that a green toast appeared, and reports success while the underlying business behaviour goes unchecked. The Playwright tooling ecosystem reports flakiness, quarantines failures, and surfaces traces; none of it tells you whether the tests being merged are *structurally honest*.
 
-- [daun/playwright-report-summary](https://github.com/daun/playwright-report-summary) posts `✅ 12 passed, 2 flaky`.
-- [Trunk](https://docs.trunk.io/flaky-tests/get-started/frameworks/playwright) auto-quarantines the flakies.
-- [Currents](https://currents.dev/) shows you the trace.
+`verdict-guard` runs on every PR and posts a single comment with three signals:
 
-None of them tell you the test is **dishonest** — i.e. it passes without verifying anything meaningful. The single highest-engagement r/Playwright thread of the last 30 days is literally titled *["ai wrote the playwright test but it only checks that a green toast appears... do you keep these?"](https://www.reddit.com/r/Playwright/comments/1u77avd/ai_wrote_the_playwright_test_but_it_only_checks/)*.
+1. **Verdict integrity** — every changed test is graded against a 6-rule rubric (toast-only, no value assertion, hidden `waitForTimeout`, weakened `.toBeTruthy()`, missing negative case, broad selector).
+2. **Anti-masking** — when a PR modifies an existing test by adding waits, loosening assertions, wrapping in `try/catch`, or marking `.skip` / `.only`, the diff is surfaced for reviewer attention.
+3. **Failure triage** — for every Playwright failure, an LLM reads the trace + DOM + network and returns a structured hypothesis (cause, severity, repro steps, next action).
 
-`verdict-guard` runs on every PR and posts a single PR comment with three signals:
+A reasoning layer above the test runner. It deliberately does not run tests, quarantine flakies, post a dashboard, or autofix — the existing ecosystem handles those well.
 
-1. **Verdict integrity score** — every new/changed test is graded against a 6-rule rubric (toast-only, no value assertion, hidden `waitForTimeout`, weakened `.toBeTruthy()`, missing negative case, broad selector). Tests below threshold are flagged with a one-line fix hint.
-2. **Anti-masking detector** — if a PR *modifies* an existing test by adding `waitForTimeout`, loosening assertions, wrapping in `try/catch`, or marking `.skip` / `.only`, the comment surfaces the diff and asks for reviewer attention.
-3. **Failure triage** — for every failure, an LLM reads the Playwright trace + DOM + network and returns a structured hypothesis (`cause: app-bug | test-drift | infra-flake | env-issue`, severity, repro steps, next action).
-
-No external dashboard. No JUnit upload. Runs entirely inside your repo.
+📄 The full reasoning behind this — research signals, design decisions, code highlights, and trade-offs — lives in the companion paper (*coming soon*).
 
 ## See it in action
 
@@ -100,13 +96,6 @@ Use `failed-rubric-count` as a gateable integer if you want hard merge protectio
   run: exit 1
 ```
 
-## What it does NOT do
-
-- **No quarantine.** Trunk does that well; this is a reasoning layer above it.
-- **No dashboard.** Currents does that well; this stays in-repo.
-- **No test execution.** It reads what Playwright already produced.
-- **No autonomous fixes.** It surfaces and explains. Humans decide.
-
 ## Architecture
 
 ```
@@ -121,15 +110,7 @@ PR event
 
 Two layers are deterministic AST/regex (free, milliseconds, regression-testable). The LLM only runs on real failures, capped at 5 per PR, with truncated trace excerpts. Expected cost on a typical PR with 0–2 failures: **< $0.03**.
 
-For more, see [`docs/architecture.md`](./docs/architecture.md) and the evidence corpus at [`docs/research-2026-06-23.md`](./docs/research-2026-06-23.md).
-
-## Why this exists
-
-Three signals from a 30-day evidence sweep across r/Playwright, r/QualityAssurance, HN, and the Playwright tooling vendors:
-
-1. **AI-generated tests increasingly pass without verifying anything.** The Reddit thread above is the most engaged community signal in the window.
-2. **AI-driven refactors mask flakiness rather than fix it** — adding waits, retries, or relaxed assertions. Currents' own [State of Playwright AI Ecosystem 2026](https://currents.dev/posts/state-of-playwright-ai-ecosystem-in-2026) names this pattern explicitly.
-3. **The primitive form exists everywhere; the reasoning layer is empty.** PostHog's own PR bot posts `⚠️ 2 flaky tests` with zero analysis. Every team has a flakiness counter; almost none have a verdict-integrity gate.
+For more, see [`docs/architecture.md`](./docs/architecture.md).
 
 ## Privacy
 
@@ -140,4 +121,3 @@ Three signals from a 30-day evidence sweep across r/Playwright, r/QualityAssuran
 ## License
 
 MIT. Use it, fork it, ship it.
-# verdict-guard
