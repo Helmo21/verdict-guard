@@ -20,7 +20,7 @@ AI assistants increasingly write Playwright tests that pass without verifying an
 
 A reasoning layer above the test runner. It deliberately does not run tests, quarantine flakies, post a dashboard, or autofix — the existing ecosystem handles those well.
 
-📄 The full reasoning behind this — research signals, design decisions, code highlights, and trade-offs — lives in the companion paper (*coming soon*).
+The full reasoning behind this — research signals, design decisions, code highlights, real-repo evaluation, and a live cross-repo benchmark — lives in the companion paper: [**read it on GitHub**](./docs/paper.pdf) (renders inline) or [Markdown source](./docs/paper.md).
 
 ## See it in action
 
